@@ -1,25 +1,29 @@
-import logo from './logo.svg';
 import './App.css';
+import { TopMenu } from './components/top-menu/TopMenu';
+import { Route, Routes } from 'react-router-dom';
+import { Login } from './components/login-page/Login';
+import { Register } from './components/register/register';
+import { Employee } from './components/employee/employee';
+import EmployeeDashboard from './components/employee/EmployeeDashboard';
+import HrDashboard from './components/hr/Hr';
+import ManagerDashboard from './components/manager/Manager';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <TopMenu />
+      <Routes>
+        <Route path="/login" element={<Login/>} />
+        <Route path="/register" element={<Register/>} />
+        <Route path="/employee" element={<Employee/>} />
+        <Route path="/employee/dashboard" element={<EmployeeDashboard/>} />
+        <Route path="/hr/dashboard" element={<HrDashboard/>} />
+        <Route path="/manager/dashboard" element={<ManagerDashboard/>} />
+        <Route path="/" element={<Login />} /> 
+      </Routes>
+    </>
   );
 }
 
 export default App;
+
