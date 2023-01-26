@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import employeeService from "../../services/employee-service";
 import hrService from "../../services/hr-service";
 import { Cards } from "../cards/Cards";
@@ -6,8 +6,11 @@ import '../cards/Cards.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 function HrDashboard() {
+
+  const childRef = useRef(null);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [leaveRequestsLen, setLeaveRequestsLen] = useState(true);
+  const [modalType, setModalType] = useState(true);
 
   const [modalData, setModalData] = useState({
     leaveId: "",
@@ -57,7 +60,7 @@ function HrDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps, no-undef
   }, [leaveRequestsLen]);
 
-  const onFormSubmitHR = (item) => {
+  const onFormSubmitHR = (item, str) => {
     setModalData(state => ({
       ...state,
       leaveId: item.leaveId,
@@ -67,9 +70,14 @@ function HrDashboard() {
       noOfDays: item.noOfDays,
       comments: item.comments,
       medicalreport: item.medicalreport
-    }))
-    console.log("Hr---------------------");
-    console.log(modalData);
+    }));
+    if (str === "approve") {
+      if (modalType !== true)
+        setModalType(previousValue => !previousValue);
+    } else {
+      if (modalType !== false)
+        setModalType(previousValue => !previousValue);
+    }
   }
 
   const applyLeave = (item, status) => {
@@ -89,19 +97,33 @@ function HrDashboard() {
           position: toast.POSITION.BOTTOM_CENTER
         });
       }
-      console.log(data)
+      console.log(data);
     });
+  }
+
+  const handleDownloadHr = () => {
+    childRef.current.handleDownload();
+  }
+  function validateMedical(valid) {
+    if (valid) {
+      toast.success("Medical Report Validated Succesfully", {
+        position: toast.POSITION.BOTTOM_CENTER
+      });
+    } else {
+      toast.error("Medical Report Updated as Invalid:", {
+        position: toast.POSITION.BOTTOM_CENTER
+      });
+    }
   }
 
   return (
     <>
       <div className="home-page-container" >
         <h3 style={{ textAlign: "center", padding: 20 }}>Welcome to HR Dashboard</h3>
-        <p style={{ textAlign: "center", fontSize: 30 }}><i class="fa fa-refresh" aria-hidden="true" onClick={() => { window.location.reload() }}></i></p>
+        <p style={{ textAlign: "center", fontSize: 30 }}><i className="fa fa-refresh" aria-hidden="true" onClick={() => { window.location.reload() }}></i></p>
         <div className="card-deck">
-
-          {leaveRequestsLen && leaveRequests?.filter(item => item.status === "SENT_TO_HR").map((item) => {
-            return <Cards res={item} key={item.id} onFormSubmitHR={onFormSubmitHR} />
+          {leaveRequestsLen && leaveRequests?.filter(item => item.status === "SENT_TO_HR").map((item , index) => {
+            return <Cards res={item} key={index} onFormSubmitHR={onFormSubmitHR} ref={childRef} />
           })
           }
           {
@@ -112,40 +134,73 @@ function HrDashboard() {
             )
           }
         </div>
-
+        
         <div className="modal fade" id="myModal" role="dialog">
           <div className="modal-dialog">
             <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title" >HR Approval Form</h4>
-                <button type="button" className="close" data-dismiss="modal">&times;</button>
+              {modalType && (<>
+                <div className="modal-header">
+                  <h4 className="modal-title" >HR Approval Form</h4>
+                  <button type="button" className="close" data-dismiss="modal">&times;</button>
 
-              </div>
-              <div className="modal-body">
-                <form className="leave-form" noValidate>
-                  <div className="profile">
-                    <i className="fa fa-user" aria-hidden="true"></i>
-                  </div>
-                  <table>
-                    <tbody>
-                      <tr><td>Leave Id </td><td>{modalData.leaveId}</td></tr>
-                      <tr><td>Status</td><td>{modalData.status}</td></tr>
-                      <tr><td>Employee Id </td><td>{modalData.employeeId}</td></tr>
-                      <tr><td>Leave Type </td><td>{modalData.leaveType}</td></tr>
-                      <tr><td>Days </td><td>{modalData.noOfDays}</td></tr>
-                      <tr><td>Comments</td><td>{modalData.comments}</td></tr>
-                      <tr><td>Medicalreport NUmber</td><td>{modalData.medicalreport}</td></tr>
-                    </tbody>
-                  </table>
-                  <div>
-                  </div>
-                  <div className="d-grid mt-3">
-                    <button type="button" className="btn btn-block btn-primary" onClick={() => applyLeave(modalData, "APPROVE")} >Approve</button>
-                    <button type="button" className="btn btn-block btn-primary" onClick={() => applyLeave(modalData, "REJECTED")} >Reject</button>
+                </div>
+                <div className="modal-body">
+                  <form className="leave-form" noValidate>
+                    <div className="profile">
+                      <i className="fa fa-user" aria-hidden="true"></i>
+                    </div>
+                    <table>
+                      <tbody>
+                        <tr><td>Leave Id </td><td>{modalData.leaveId}</td></tr>
+                        <tr><td>Status</td><td>{modalData.status}</td></tr>
+                        <tr><td>Employee Id </td><td>{modalData.employeeId}</td></tr>
+                        <tr><td>Leave Type </td><td>{modalData.leaveType}</td></tr>
+                        <tr><td>Days </td><td>{modalData.noOfDays}</td></tr>
+                        <tr><td>Comments</td><td>{modalData.comments}</td></tr>
+                        <tr><td>Medicalreport NUmber</td><td>{modalData.medicalreport}</td></tr>
+                      </tbody>
+                    </table>
+                    <div>
+                    </div>
+                    <div className="d-grid mt-3">
+                      <button type="button" className="btn btn-block btn-primary" onClick={() => applyLeave(modalData, "APPROVE")} >Approve</button>
+                      <button type="button" className="btn btn-block btn-primary" onClick={() => applyLeave(modalData, "REJECTED")} >Reject</button>
+                    </div> <br />
+                  </form>
+                </div>
+              </>
+              )}
+              {!modalType && (
+                <>
+                  <div className="modal-header">
+                    <h4 className="modal-title" >Check Medical Report</h4>
+                    <button type="button" className="close" data-dismiss="modal">&times;</button>
 
-                  </div> <br />
-                </form>
-              </div>
+                  </div>
+                  <div className="modal-body">
+                    <form className="leave-form" noValidate>
+                      <table>
+                        <tbody>
+                          <tr><td>Leave Id </td><td>{modalData.leaveId}</td></tr>
+                          <tr><td>Employee Id </td><td>{modalData.employeeId}</td></tr>
+                        </tbody>
+                      </table>
+                      <div>
+                      </div>
+                      <div className="d-grid mt-3">
+                        <label className="download-label"> Medicale Report: </label>(Click here to Download)
+                        <button type="button" className="btn btn-block btn-primary" onClick={handleDownloadHr}>Download Medical Report PDF</button> <br />
+                        <label> Validate:</label>
+                        <div className="validate-btn-container">
+                          <button type="button" className="btn btn-success valid" onClick={() => validateMedical(true)} >Valid</button>
+                          <button type="button" className="btn btn-danger invalid" onClick={() => validateMedical(false)} >Invalid</button>
+                        </div>
+                      </div> <br />
+                    </form>
+                  </div>
+                </>
+              )
+              }
               <div className="modal-footer">
                 <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
               </div>
@@ -153,7 +208,6 @@ function HrDashboard() {
           </div>
         </div>
         <ToastContainer />
-
       </div>
     </>
   )

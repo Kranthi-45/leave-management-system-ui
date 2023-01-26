@@ -15,7 +15,8 @@ function ManagerDashboard() {
     leaveType: "",
     noOfDays: "",
     comments: "",
-    medicalreport: ""
+    medicalreport: "",
+    file: ''
   });
 
   const [employeeDetails, setEmployeeDetails] = useState({
@@ -50,6 +51,7 @@ function ManagerDashboard() {
       let res = data1.data?.filter(item => item.status === "SENT_TO_MANAGER");
       setLeaveRequestsLen(res.length > 0);
       setLeaveRequests(data1.data);
+      console.log(data1.data);
     });
     toast.info("Page is Updated", {
       position: toast.POSITION.TOP_CENTER
@@ -97,11 +99,11 @@ function ManagerDashboard() {
     <>
       <div className="home-page-container" >
         <h3 style={{ textAlign: "center", padding: 20 }}>Welcome to Manager Dashboard</h3>
-        <p style={{ textAlign: "center", fontSize: 30 }}><i class="fa fa-refresh" aria-hidden="true" onClick={() => { window.location.reload() }}></i></p>
+        <p style={{ textAlign: "center", fontSize: 30 }}><i className="fa fa-refresh" aria-hidden="true" onClick={() => { window.location.reload() }}></i></p>
         <div className="card-deck">
-          {leaveRequestsLen && leaveRequests?.filter(item => item.status === "SENT_TO_MANAGER").map((item) => {
+          {leaveRequestsLen && leaveRequests?.filter(item => item.status === "SENT_TO_MANAGER").map((item, index) => {
             return <>
-              <Cards res={item} key={item.id} onFormSubmitHR={onFormSubmitHR} />
+              <Cards res={item} key={index} onFormSubmitHR={onFormSubmitHR} />
             </>
           })
           }

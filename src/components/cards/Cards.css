@@ -148,6 +148,18 @@
 .fa-refresh{
   cursor: pointer;
 }
+.download-label{
+  color: black;
+}
+.validate-btn-container{
+   display: flex;
+   column-gap: 30px;
+   justify-content: center;
+}
+.valid , .invalid{
+  width: 50%;
+  flex-basis: 40%;
+}
 @media only screen and (max-width: 767px){
   .link{
     width: 50%;

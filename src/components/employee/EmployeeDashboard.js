@@ -7,6 +7,8 @@ function EmployeeDashboard() {
   const [appliedStatus, setAppliedStatus] = useState(false);
   const [showLeave, setShowLeave] = useState(false);
   const [showLeaveMessage, setShowLeaveMessage] = useState("");
+  const [empStatus, setEmpStatus] = useState([]);
+
   const [employeeDetails, setEmployeeDetails] = useState({
     employeeId: '',
     employeeName: "",
@@ -20,7 +22,8 @@ function EmployeeDashboard() {
   const [leaveApplyDetails, setLeaveApplyDetails] = useState({
     empId: '',
     days: "",
-    type: ""
+    type: "",
+    file: ""
   });
 
   const getData = async (empId) => {
@@ -34,6 +37,9 @@ function EmployeeDashboard() {
       annualLeave: data.annualLeave,
       paternityLeave: data.paternityLeave,
       maternityLeave: data.maternityLeave
+    });
+    employeeService.getEmployeeStatus(empId).then((data1) => {
+      setEmpStatus(data1.data);
     });
   };
 
@@ -55,8 +61,16 @@ function EmployeeDashboard() {
       ...prev,
       empId: employeeDetails.employeeId,
     }));
+
+    const formData = new FormData();
+    formData.append('empId', leaveApplyDetails.empId);
+    formData.append('days', leaveApplyDetails.days);
+    formData.append('type', leaveApplyDetails.type);
+    formData.append('file', leaveApplyDetails.file, leaveApplyDetails.file.name);
+
     console.log(leaveApplyDetails)
-    const { data } = await employeeService.applyLeave(leaveApplyDetails);
+    console.log(formData)
+    const { data } = await employeeService.applyLeave(formData);
     console.log("leave applied");
     console.log(data);
     setAppliedStatus(true);
@@ -66,10 +80,17 @@ function EmployeeDashboard() {
   }
 
   function changeHandler(event) {
-    setLeaveApplyDetails((prev) => ({
-      ...prev,
-      [event.target.name]: event.target.value,
-    }));
+    if (event.target.name === 'file') {
+      setLeaveApplyDetails((prev) => ({
+        ...prev,
+        [event.target.name]: event.target.files[0],
+      }));
+    } else {
+      setLeaveApplyDetails((prev) => ({
+        ...prev,
+        [event.target.name]: event.target.value,
+      }));
+    }
   }
 
   return (
@@ -91,7 +112,7 @@ function EmployeeDashboard() {
         <button type="submit" className="showLeave btn btn-block btn-primary" onClick={() => showLeaveDetail(employeeDetails.employeeId)}>Show Leave Balance</button>
       </div>
 
-      {showLeave &&
+      { showLeave &&
         <>
           <div className="alert alert-success alert-dismissible fade show show-leave" role="alert">
             <strong>{showLeaveMessage}</strong>
@@ -101,6 +122,20 @@ function EmployeeDashboard() {
           </div>
         </>
       }
+
+      <div className="emp-applications">
+        <h3 style={{textAlign:"center"}}>Leave Application Records</h3> <br/>
+        <table>
+          <tbody>
+            <tr><th>Leave Id</th> <th>LeaveType</th><th>No of Days</th><th>Status</th></tr>
+            {
+              empStatus.map((item , index) => {
+              return <tr key={index}><td>{item.leaveId}</td><td>{item.leaveType}</td><td>{item.noOfDays}</td><td>{item.status}</td></tr>
+              })
+            }
+            </tbody>
+        </table>
+      </div>
 
       <div className="modal fade" id="myModal" role="dialog">
         <div className="modal-dialog">
@@ -127,6 +162,11 @@ function EmployeeDashboard() {
                 <div className="form-group mb-3">
                   <label className="mb-2"><strong>Days</strong></label>
                   <input required type="number" name="days" id="days" className="form-control" onChange={changeHandler} />
+                </div>
+
+                <div className="form-group mb-3">
+                  <input type="file" name="file" onChange={changeHandler}/>
+                  <button className="btn btn-success" onClick={(e) => { e.preventDefault() }}>Upload</button>
                 </div>
 
                 <div className="d-grid mt-3">

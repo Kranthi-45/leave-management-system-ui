@@ -25,10 +25,14 @@ table {
   }
   .show-leave {
     margin: auto;
-  width: 50%;
+    width: 50%;
+    margin-bottom: 20px;
 }
 .employee-buttons{
   width: 50%;
   margin:auto;
   padding:20px;
+}
+.emp-applications{
+  padding-bottom: 100px;
 }

@@ -54,9 +54,9 @@ export class Employee extends Component {
             }
         }
     }
+
     componentWillUnmount() {
     }
-
     onFormSubmit = async (event) => {
         event.preventDefault();
         let error = { ...this.state.error };
